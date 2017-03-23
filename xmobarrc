@@ -29,30 +29,27 @@ Config {
   commands = [
     -- Gather and format CPU usage information.
     -- If it's above 50%, we consider it high usage and make it red.
-    -- Run Cpu [
-    --   "-H","50",
-    --   "--high","red"
-    -- ] 10,
+    Run Cpu [ "-t"     , "C:<total>"
+            , "-H"     , "50"
+            , "--high" , "red"] 10,
 
-    -- -- Gather and format memory usage information
-    -- Run Memory [
-    --   "-t","Mem: <usedratio>%"
-    -- ] 10,
+    -- Gather and format memory usage information
+    Run Memory [ "-t", "M:<usedratio>"] 10,
 
     -- Date formatting
-      Run Date "%a %b %_d %H:%M" "date" 10,
+    Run Date "%m/%d %H:%M" "date" 10,
 
-    -- Battery information. This is likely to require some customization
-    -- based upon your specific hardware. Or, for a desktop you may want
-      -- t1o just remove this section entirely.
-    Run Battery [
-      "-t", "<acstatus>: <left>%",
-      "--",
-      "-O", "AC",
-      "-o", "Bat",
-      "-h", "green",
-      "-l", "red"
-    ] 10,
+    -- Battery information. This is likely to require some customization based
+    -- upon your specific hardware. Or, for a desktop you may want to just
+    -- remove this section entirely.
+    Run Battery [ "-t", "B:<left>"
+                , "--"
+                , "-p", "orange"
+                , "-O", "AC"
+                , "-i", "AC"
+                , "-o", "Bat"
+                , "-h", "green"
+                , "-l", "red"] 10,
 
     -- To get volume information, we run a custom bash script.
     -- This is because the built-in volume support in xmobar is disabled
@@ -73,5 +70,5 @@ Config {
 
    -- Overall template for the layout of the xmobar contents. Note that
    -- space is significant and can be used to add padding.
-   template = "%StdinReader% }{ %battery% | Vol: %myvolume%    <fc=#e6744c>%date%</fc>     "
+   template = "%StdinReader% }{ %battery% %cpu% %memory% V:%myvolume% <fc=#e6744c>%date%</fc>     "
 }
