@@ -18,37 +18,37 @@ import XMonad
 import XMonad.Hooks.SetWMName
 import XMonad.Layout.Grid
 import XMonad.Layout.ResizableTile
-import XMonad.Layout.IM
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.NoBorders
-import XMonad.Layout.Circle
 import XMonad.Layout.PerWorkspace (onWorkspace)
 import XMonad.Layout.Fullscreen
 import XMonad.Util.EZConfig
 import XMonad.Util.Run
 import XMonad.Hooks.DynamicLog
-import XMonad.Actions.Plane
 import XMonad.Actions.DynamicProjects
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.UrgencyHook
-import XMonad.Hooks.ICCCMFocus
 import qualified XMonad.StackSet as W
-import qualified Data.Map as M
-import Data.Ratio ((%))
 
 {-
   Xmonad configuration variables. These settings control some of the
   simpler parts of xmonad's behavior and are straightforward to tweak.
 -}
 
-myModMask            = mod4Mask       -- changes the mod key to "super"
+myModMask :: KeyMask
+myModMask = mod4Mask       -- changes the mod key to "super"
+
+myFocusedBorderColor :: String
 myFocusedBorderColor = "#ff0000"      -- color of focused border
-myNormalBorderColor  = "#cccccc"      -- color of inactive border
-myBorderWidth        = 1              -- width of border around windows
-myTerminal           = "gnome-terminal"   -- which terminal software to use
-myIMRosterTitle      = "Buddy List"   -- title of roster on IM workspace
-                                      -- use "Buddy List" for Pidgin, but
-                                      -- "Contact List" for Empathy
+
+myNormalBorderColor :: String
+myNormalBorderColor = "#cccccc"      -- color of inactive border
+
+myBorderWidth :: Dimension
+myBorderWidth = 1              -- width of border around windows
+
+myTerminal :: String
+myTerminal = "gnome-terminal"   -- which terminal software to use
 
 
 {-
@@ -56,16 +56,34 @@ myIMRosterTitle      = "Buddy List"   -- title of roster on IM workspace
   of text which xmonad is sending to xmobar via the DynamicLog hook.
 -}
 
+myTitleColor :: String
 myTitleColor     = "#eeeeee"  -- color of window title
+
+myTitleLength :: Int
 myTitleLength    = 80         -- truncate window title to this length
+
+myCurrentWSColor :: String
 myCurrentWSColor = "#e6744c"  -- color of active workspace
+
+myVisibleWSColor :: String
 myVisibleWSColor = "#c185a7"  -- color of inactive workspace
+
+myUrgentWSColor :: String
 myUrgentWSColor  = "#cc0000"  -- color of workspace with 'urgent' window
+
+myCurrentWSLeft :: String
 myCurrentWSLeft  = "["        -- wrap active workspace with these
+myCurrentWSRight :: String
 myCurrentWSRight = "]"
+
+myVisibleWSLeft :: String
 myVisibleWSLeft  = "("        -- wrap inactive workspace with these
+myVisibleWSRight :: String
 myVisibleWSRight = ")"
+
+myUrgentWSLeft :: String
 myUrgentWSLeft  = "{"         -- wrap urgent workspace with these
+myUrgentWSRight :: String
 myUrgentWSRight = "}"
 
 
@@ -106,41 +124,37 @@ gimpWorkspace :: String
 gimpWorkspace = "9:Pix"
 
 projects :: [Project]
-projects =
-  [ Project { projectName      = devWorkspace
-            , projectDirectory = "~/programming"
-            , projectStartHook = Just $ do spawn "emacs"
-            },
-    Project { projectName      = webWorkspace
-            , projectDirectory = "~/"
-            , projectStartHook = Just $ do spawn "chromium-browser"
-            },
-    Project { projectName      = devWebWorkspace
-            , projectDirectory = "~/"
-            , projectStartHook = Just $ do spawn "chromium-browser"
-            },
-    Project { projectName      = termWorkspace
-            , projectDirectory = "~/"
-            , projectStartHook = Just $ do spawn myTerminal
-            },
-    Project { projectName      = chatWorkspace
-            , projectDirectory = "~/"
-            , projectStartHook = Just $ do spawn $ "chromium-browser  --new-window"
-                                             ++ " https://www.messenger.com/ "
-                                             ++ " https://blono-fp-slackers.slack.com/messages/ "
-                                             ++ " https://hangouts.google.com/ "
-                                             ++ " https://inbox.google.com/ "
-            }]
+projects = [ Project { projectName      = devWorkspace
+                     , projectDirectory = "~/programming"
+                     , projectStartHook = Just $ do spawn "emacs"}
+           , Project { projectName      = webWorkspace
+                     , projectDirectory = "~/"
+                     , projectStartHook = Just $ do spawn "chromium-browser"}
+           , Project { projectName      = devWebWorkspace
+                     , projectDirectory = "~/"
+                     , projectStartHook = Just $ do spawn "chromium-browser"}
+           , Project { projectName      = termWorkspace
+                     , projectDirectory = "~/"
+                     , projectStartHook = Just $ do spawn myTerminal}
+           , Project { projectName      = chatWorkspace
+                     , projectDirectory = "~/"
+                     , projectStartHook = Just $ do spawn $ "chromium-browser  --new-window"
+                                                      ++ " https://www.messenger.com/ "
+                                                      ++ " https://blono-fp-slackers.slack.com/messages/ "
+                                                      ++ " https://hangouts.google.com/ "}
+           , Project { projectName     = mailWorkSpace
+                     , projectDirectory = "~/"
+                     , projectStartHook = Just $ do spawn $ "chromium-browser --new-window"
+                                                      ++ " https://inbox.google.com/ "}]
 
-myWorkspaces =
-  [
-    mailWorkSpace,  "8:Dbg", gimpWorkspace,
-    chatWorkspace, misc1Workspace, devWebWorkspace,
-    webWorkspace,  termWorkspace, devWorkspace,
-    "0:VM",    "Extr1", "Extr2"
-  ]
+myWorkspaces :: [String]
+myWorkspaces = [ mailWorkSpace  , "8:Dbg"        , gimpWorkspace
+                , chatWorkspace , misc1Workspace , devWebWorkspace
+                , webWorkspace  , termWorkspace  , devWorkspace
+                , "0:VM"        , "Extr1"        , "Extr2"]
 
-startupWorkspace = "5:Dev"  -- which workspace do you want to be on after launch?
+startupWorkspace :: String
+startupWorkspace = webWorkspace
 
 {-
   Layout configuration. In this section we identify which xmonad
@@ -155,17 +169,30 @@ startupWorkspace = "5:Dev"  -- which workspace do you want to be on after launch
   in the next section).
 -}
 
--- Define group of default layouts used on most screens, in the
--- order they will appear.
--- "smartBorders" modifier makes it so the borders on windows only
--- appear if there is more than one visible window.
--- "avoidStruts" modifier makes it so that the layout provides
--- space for the status bar at the top of the screen.
-defaultLayouts = smartBorders(avoidStruts(
-  -- ResizableTall layout has a large master window on the left,
-  -- and remaining windows tile on the right. By default each area
-  -- takes up half the screen, but you can resize using "super-h" and
-  -- "super-l".
+-- Here we define some layouts which will be assigned to specific
+-- workspaces based on the functionality of that workspace.
+
+-- The GIMP layout uses the ThreeColMid layout. The traditional GIMP
+-- floating panels approach is a bit of a challenge to handle with xmonad;
+-- I find the best solution is to make the image you are working on the
+-- master area, and then use this ThreeColMid layout to make the panels
+-- tile to the left and right of the image. If you use GIMP 2.8, you
+-- can use single-window mode and avoid this issue.
+gimpLayout = smartBorders(avoidStruts(ThreeColMid 1 (3/100) (3/4)))
+
+-- Here we combine our default layouts with our specific, workspace-locked
+-- layouts.
+myLayouts =
+  onWorkspace gimpWorkspace gimpLayout
+  -- Define group of default layouts used on most screens, in the order they
+  -- will appear. "smartBorders" modifier makes it so the borders on windows
+  -- only appear if there is more than one visible window. "avoidStruts"
+  -- modifier makes it so that the layout provides space for the status bar at
+  -- the top of the screen.
+  $ smartBorders(avoidStruts(
+  -- ResizableTall layout has a large master window on the left, and remaining
+  -- windows tile on the right. By default each area takes up half the screen,
+  -- but you can resize using "super-h" and "super-l".
   ResizableTall 1 (3/100) (1/2) []
 
   -- Mirrored variation of ResizableTall. In this layout, the large
@@ -194,24 +221,6 @@ defaultLayouts = smartBorders(avoidStruts(
   ||| Grid))
 
 
--- Here we define some layouts which will be assigned to specific
--- workspaces based on the functionality of that workspace.
-
--- The GIMP layout uses the ThreeColMid layout. The traditional GIMP
--- floating panels approach is a bit of a challenge to handle with xmonad;
--- I find the best solution is to make the image you are working on the
--- master area, and then use this ThreeColMid layout to make the panels
--- tile to the left and right of the image. If you use GIMP 2.8, you
--- can use single-window mode and avoid this issue.
-gimpLayout = smartBorders(avoidStruts(ThreeColMid 1 (3/100) (3/4)))
-
--- Here we combine our default layouts with our specific, workspace-locked
--- layouts.
-myLayouts =
-  onWorkspace gimpWorkspace gimpLayout
-  $ defaultLayouts
-
-
 {-
   Custom keybindings. In this section we define a list of relatively
   straightforward keybindings. This would be the clearest place to
@@ -235,19 +244,12 @@ myLayouts =
   Launch the command, then type the key in question and watch
   the output.
 -}
-
-myKeyBindings =
-  [
-    ((myModMask, xK_b), sendMessage ToggleStruts)
-    , ((myModMask, xK_a), sendMessage MirrorShrink)
-    , ((myModMask, xK_z), sendMessage MirrorExpand)
-    , ((myModMask, xK_p), spawn "synapse")
-    , ((myModMask .|. mod1Mask, xK_space), spawn "synapse")
-    , ((myModMask, xK_u), focusUrgent)
-    , ((0, 0x1008FF12), spawn "amixer -q set Master toggle")
-    , ((0, 0x1008FF11), spawn "amixer -q set Master 10%-")
-    , ((0, 0x1008FF13), spawn "amixer -q set Master 10%+")
-    ]
+myKeyBindings :: [((KeyMask, KeySym), X ())]
+myKeyBindings = [((myModMask, xK_b), sendMessage ToggleStruts)
+                , ((myModMask, xK_a), sendMessage MirrorShrink)
+                , ((myModMask, xK_z), sendMessage MirrorExpand)
+                , ((myModMask .|. mod1Mask, xK_space), spawn "synapse")
+                , ((myModMask, xK_u), focusUrgent)]
 
 
 {-
@@ -294,19 +296,9 @@ myKeyBindings =
 -}
 
 myManagementHooks :: [ManageHook]
-myManagementHooks = [
-  resource =? "synapse" --> doIgnore
-  , resource =? "stalonetray" --> doIgnore
-  , className =? "rdesktop" --> doFloat
-  , (className =? "Komodo IDE") --> doF (W.shift "5:Dev")
-  , (className =? "Komodo IDE" <&&> resource =? "Komodo_find2") --> doFloat
-  , (className =? "Komodo IDE" <&&> resource =? "Komodo_gotofile") --> doFloat
-  , (className =? "Komodo IDE" <&&> resource =? "Toplevel") --> doFloat
-  , (className =? "Empathy") --> doF (W.shift chatWorkspace)
-  , (className =? "Pidgin") --> doF (W.shift chatWorkspace)
-  , (className =? "Gimp-2.8") --> doF (W.shift gimpWorkspace)
-  ]
-
+myManagementHooks = [ resource =? "synapse" --> doIgnore
+                    , resource =? "stalonetray" --> doIgnore
+                    , (className =? "Gimp-2.8") --> doF (W.shift gimpWorkspace)]
 
 {-
   Workspace navigation keybindings. This is probably the part of the
@@ -323,46 +315,22 @@ myManagementHooks = [
 -- use the numpad or the top-row number keys. And, we also
 -- use them to figure out where to go when the user
 -- uses the arrow keys.
-numPadKeys =
-  [
-    xK_KP_Home, xK_KP_Up, xK_KP_Page_Up
-    , xK_KP_Left, xK_KP_Begin,xK_KP_Right
-    , xK_KP_End, xK_KP_Down, xK_KP_Page_Down
-    , xK_KP_Insert, xK_KP_Delete, xK_KP_Enter
-  ]
-
-numKeys =
-  [
-      xK_7, xK_8, xK_9
-    , xK_4, xK_5, xK_6
-    , xK_1, xK_2, xK_3
-    , xK_0, xK_minus, xK_equal
-  ]
+numKeys :: [KeySym]
+numKeys = [ xK_7, xK_8, xK_9
+          , xK_4, xK_5, xK_6
+          , xK_1, xK_2, xK_3
+          , xK_0, xK_minus, xK_equal]
 
 -- Here, some magic occurs that I once grokked but has since
 -- fallen out of my head. Essentially what is happening is
 -- that we are telling xmonad how to navigate workspaces,
 -- how to send windows to different workspaces,
 -- and what keys to use to change which monitor is focused.
-myKeys = myKeyBindings ++
-  [
-    ((m .|. myModMask, k), windows $ f i)
-       | (i, k) <- zip myWorkspaces numPadKeys
-       , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]
-  ] ++
-  [
-    ((m .|. myModMask, k), windows $ f i)
-       | (i, k) <- zip myWorkspaces numKeys
-       , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]
-  ] ++
-  M.toList (planeKeys myModMask (Lines 4) Finite) ++
-  [
-    ((m .|. myModMask, key), screenWorkspace sc
-      >>= flip whenJust (windows . f))
-      | (key, sc) <- zip [xK_w, xK_e, xK_r] [1,0,2]
-      , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]
-  ]
-
+myKeys :: [((KeyMask, KeySym), X ())]
+myKeys = myKeyBindings
+  ++ [((m .|. myModMask, k), windows $ f i) |
+      (i, k) <- zip myWorkspaces numKeys
+     , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
 
 {-
   Here we actually stitch together all the configuration settings
@@ -370,35 +338,35 @@ myKeys = myKeyBindings ++
   content into it via the logHook.
 -}
 
+main :: IO ()
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobarrc"
   xmonad
     $ dynamicProjects projects
-    $ withUrgencyHook NoUrgencyHook $ defaultConfig {
-    focusedBorderColor = myFocusedBorderColor
-  , normalBorderColor = myNormalBorderColor
-  , terminal = myTerminal
-  , borderWidth = myBorderWidth
-  , layoutHook = myLayouts
-  , workspaces = myWorkspaces
-  , modMask = myModMask
-  , handleEventHook = fullscreenEventHook
-  , startupHook = do
-      setWMName "LG3D"
-      windows $ W.greedyView startupWorkspace
-      spawn "~/.xmonad/startup-hook"
-  , manageHook = manageHook defaultConfig
-      <+> composeAll myManagementHooks
-      <+> manageDocks
-  , logHook = takeTopFocus <+> dynamicLogWithPP xmobarPP {
-      ppOutput = hPutStrLn xmproc
+    $ withUrgencyHook NoUrgencyHook $ def
+    { focusedBorderColor = myFocusedBorderColor
+    , normalBorderColor = myNormalBorderColor
+    , terminal = myTerminal
+    , borderWidth = myBorderWidth
+    , layoutHook = myLayouts
+    , workspaces = myWorkspaces
+    , modMask = myModMask
+    , handleEventHook = fullscreenEventHook
+    , startupHook = do setWMName "LG3D"
+                       windows $ W.greedyView startupWorkspace
+                       spawn "~/.xmonad/startup-hook"
+    , manageHook = manageHook def
+                   <+> composeAll myManagementHooks
+                   <+> manageDocks
+    , logHook = dynamicLogWithPP xmobarPP
+      { ppOutput = hPutStrLn xmproc
       , ppTitle = xmobarColor myTitleColor "" . shorten myTitleLength
       , ppCurrent = xmobarColor myCurrentWSColor ""
-        . wrap myCurrentWSLeft myCurrentWSRight
+                    . wrap myCurrentWSLeft myCurrentWSRight
       , ppVisible = xmobarColor myVisibleWSColor ""
-        . wrap myVisibleWSLeft myVisibleWSRight
+                    . wrap myVisibleWSLeft myVisibleWSRight
       , ppUrgent = xmobarColor myUrgentWSColor ""
-        . wrap myUrgentWSLeft myUrgentWSRight
+                   . wrap myUrgentWSLeft myUrgentWSRight
     }
   }
     `additionalKeys` myKeys
