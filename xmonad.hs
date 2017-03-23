@@ -28,6 +28,7 @@ import XMonad.Util.EZConfig
 import XMonad.Util.Run
 import XMonad.Hooks.DynamicLog
 import XMonad.Actions.Plane
+import XMonad.Actions.DynamicProjects
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.UrgencyHook
 import XMonad.Hooks.ICCCMFocus
@@ -44,7 +45,7 @@ myModMask            = mod4Mask       -- changes the mod key to "super"
 myFocusedBorderColor = "#ff0000"      -- color of focused border
 myNormalBorderColor  = "#cccccc"      -- color of inactive border
 myBorderWidth        = 1              -- width of border around windows
-myTerminal           = "terminator"   -- which terminal software to use
+myTerminal           = "gnome-terminal"   -- which terminal software to use
 myIMRosterTitle      = "Buddy List"   -- title of roster on IM workspace
                                       -- use "Buddy List" for Pidgin, but
                                       -- "Contact List" for Empathy
@@ -87,11 +88,55 @@ myUrgentWSRight = "}"
   as well.
 -}
 
+webWorkspace :: String
+webWorkspace = "1:Web"
+termWorkspace :: String
+termWorkspace = "2:Term"
+devWorkspace :: String
+devWorkspace = "3:Dev"
+chatWorkspace :: String
+chatWorkspace = "4:Chat"
+misc1Workspace :: String
+misc1Workspace = "5:Misc1"
+devWebWorkspace :: String
+devWebWorkspace = "6:Web2"
+mailWorkSpace :: String
+mailWorkSpace = "7:Mail"
+gimpWorkspace :: String
+gimpWorkspace = "9:Pix"
+
+projects :: [Project]
+projects =
+  [ Project { projectName      = devWorkspace
+            , projectDirectory = "~/programming"
+            , projectStartHook = Just $ do spawn "emacs"
+            },
+    Project { projectName      = webWorkspace
+            , projectDirectory = "~/"
+            , projectStartHook = Just $ do spawn "chromium-browser"
+            },
+    Project { projectName      = devWebWorkspace
+            , projectDirectory = "~/"
+            , projectStartHook = Just $ do spawn "chromium-browser"
+            },
+    Project { projectName      = termWorkspace
+            , projectDirectory = "~/"
+            , projectStartHook = Just $ do spawn myTerminal
+            },
+    Project { projectName      = chatWorkspace
+            , projectDirectory = "~/"
+            , projectStartHook = Just $ do spawn $ "chromium-browser  --new-window"
+                                             ++ " https://www.messenger.com/ "
+                                             ++ " https://blono-fp-slackers.slack.com/messages/ "
+                                             ++ " https://hangouts.google.com/ "
+                                             ++ " https://inbox.google.com/ "
+            }]
+
 myWorkspaces =
   [
-    "7:Chat",  "8:Dbg", "9:Pix",
-    "4:Docs",  "5:Dev", "6:Web",
-    "1:Term",  "2:Hub", "3:Mail",
+    mailWorkSpace,  "8:Dbg", gimpWorkspace,
+    chatWorkspace, misc1Workspace, devWebWorkspace,
+    webWorkspace,  termWorkspace, devWorkspace,
     "0:VM",    "Extr1", "Extr2"
   ]
 
@@ -152,14 +197,6 @@ defaultLayouts = smartBorders(avoidStruts(
 -- Here we define some layouts which will be assigned to specific
 -- workspaces based on the functionality of that workspace.
 
--- The chat layout uses the "IM" layout. We have a roster which takes
--- up 1/8 of the screen vertically, and the remaining space contains
--- chat windows which are tiled using the grid layout. The roster is
--- identified using the myIMRosterTitle variable, and by default is
--- configured for Pidgin, so if you're using something else you
--- will want to modify that variable.
-chatLayout = avoidStruts(withIM (1%7) (Title myIMRosterTitle) Grid)
-
 -- The GIMP layout uses the ThreeColMid layout. The traditional GIMP
 -- floating panels approach is a bit of a challenge to handle with xmonad;
 -- I find the best solution is to make the image you are working on the
@@ -171,8 +208,7 @@ gimpLayout = smartBorders(avoidStruts(ThreeColMid 1 (3/100) (3/4)))
 -- Here we combine our default layouts with our specific, workspace-locked
 -- layouts.
 myLayouts =
-  onWorkspace "7:Chat" chatLayout
-  $ onWorkspace "9:Pix" gimpLayout
+  onWorkspace gimpWorkspace gimpLayout
   $ defaultLayouts
 
 
@@ -211,7 +247,7 @@ myKeyBindings =
     , ((0, 0x1008FF12), spawn "amixer -q set Master toggle")
     , ((0, 0x1008FF11), spawn "amixer -q set Master 10%-")
     , ((0, 0x1008FF13), spawn "amixer -q set Master 10%+")
-  ]
+    ]
 
 
 {-
@@ -266,9 +302,9 @@ myManagementHooks = [
   , (className =? "Komodo IDE" <&&> resource =? "Komodo_find2") --> doFloat
   , (className =? "Komodo IDE" <&&> resource =? "Komodo_gotofile") --> doFloat
   , (className =? "Komodo IDE" <&&> resource =? "Toplevel") --> doFloat
-  , (className =? "Empathy") --> doF (W.shift "7:Chat")
-  , (className =? "Pidgin") --> doF (W.shift "7:Chat")
-  , (className =? "Gimp-2.8") --> doF (W.shift "9:Pix")
+  , (className =? "Empathy") --> doF (W.shift chatWorkspace)
+  , (className =? "Pidgin") --> doF (W.shift chatWorkspace)
+  , (className =? "Gimp-2.8") --> doF (W.shift gimpWorkspace)
   ]
 
 
@@ -297,7 +333,7 @@ numPadKeys =
 
 numKeys =
   [
-    xK_7, xK_8, xK_9
+      xK_7, xK_8, xK_9
     , xK_4, xK_5, xK_6
     , xK_1, xK_2, xK_3
     , xK_0, xK_minus, xK_equal
@@ -336,7 +372,9 @@ myKeys = myKeyBindings ++
 
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobarrc"
-  xmonad $ withUrgencyHook NoUrgencyHook $ defaultConfig {
+  xmonad
+    $ dynamicProjects projects
+    $ withUrgencyHook NoUrgencyHook $ defaultConfig {
     focusedBorderColor = myFocusedBorderColor
   , normalBorderColor = myNormalBorderColor
   , terminal = myTerminal
