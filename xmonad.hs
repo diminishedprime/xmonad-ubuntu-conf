@@ -24,6 +24,7 @@ import XMonad.Layout.PerWorkspace (onWorkspace)
 import XMonad.Layout.Fullscreen
 import XMonad.Util.EZConfig
 import XMonad.Util.Run
+import XMonad.Util.NamedScratchpad
 import XMonad.Hooks.DynamicLog
 import XMonad.Actions.DynamicProjects
 import XMonad.Hooks.ManageDocks
@@ -108,20 +109,30 @@ myUrgentWSRight = "}"
 
 webWorkspace :: String
 webWorkspace = "1:Web"
+
 termWorkspace :: String
 termWorkspace = "2:Term"
+
 devWorkspace :: String
 devWorkspace = "3:Dev"
+
 chatWorkspace :: String
 chatWorkspace = "4:Chat"
+
 misc1Workspace :: String
 misc1Workspace = "5:Misc1"
+
 devWebWorkspace :: String
 devWebWorkspace = "6:Web2"
+
 mailWorkSpace :: String
 mailWorkSpace = "7:Mail"
+
 gimpWorkspace :: String
 gimpWorkspace = "9:Pix"
+
+perfWorkspace :: String
+perfWorkspace = "-:Perf"
 
 projects :: [Project]
 projects = [ Project { projectName      = devWorkspace
@@ -144,14 +155,16 @@ projects = [ Project { projectName      = devWorkspace
                                                       ++ " https://hangouts.google.com/ "}
            , Project { projectName     = mailWorkSpace
                      , projectDirectory = "~/"
-                     , projectStartHook = Just $ do spawn $ "chromium-browser --new-window"
-                                                      ++ " https://inbox.google.com/ "}]
+                     , projectStartHook = Just $ do spawn $ "chromium-browser --new-window --app=\"https://inbox.google.com/\""}
+           , Project { projectName     = perfWorkspace
+                     , projectDirectory = "~/"
+                     , projectStartHook = Just $ do spawn $ "gnome-system-monitor"}]
 
 myWorkspaces :: [String]
 myWorkspaces = [ mailWorkSpace  , "8:Dbg"        , gimpWorkspace
                 , chatWorkspace , misc1Workspace , devWebWorkspace
                 , webWorkspace  , termWorkspace  , devWorkspace
-                , "0:VM"        , "Extr1"        , "Extr2"]
+                , "0:VM"        , perfWorkspace  , "Extr2"]
 
 startupWorkspace :: String
 startupWorkspace = webWorkspace
@@ -244,10 +257,17 @@ myLayouts =
   Launch the command, then type the key in question and watch
   the output.
 -}
+plexCommand = "google-chrome --app=\"http://plex.mjh.io/web/index.html\" --new-window"
+scratchpads = [(NS "plex" plexCommand (className =? "Google-chrome")
+                 (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3))
+                 -- defaultFloating
+                )]
+
 myKeyBindings :: [((KeyMask, KeySym), X ())]
 myKeyBindings = [((myModMask, xK_b), sendMessage ToggleStruts)
                 , ((myModMask, xK_a), sendMessage MirrorShrink)
                 , ((myModMask, xK_z), sendMessage MirrorExpand)
+                , ((myModMask, xK_p), namedScratchpadAction scratchpads "plex")
                 , ((myModMask .|. mod1Mask, xK_space), spawn "synapse")
                 , ((myModMask, xK_u), focusUrgent)]
 
@@ -298,7 +318,8 @@ myKeyBindings = [((myModMask, xK_b), sendMessage ToggleStruts)
 myManagementHooks :: [ManageHook]
 myManagementHooks = [ resource =? "synapse" --> doIgnore
                     , resource =? "stalonetray" --> doIgnore
-                    , (className =? "Gimp-2.8") --> doF (W.shift gimpWorkspace)]
+                    , (className =? "Gimp-2.8") --> doF (W.shift gimpWorkspace)
+                    , namedScratchpadManageHook scratchpads]
 
 {-
   Workspace navigation keybindings. This is probably the part of the
