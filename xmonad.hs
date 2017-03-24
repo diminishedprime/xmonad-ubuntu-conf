@@ -18,6 +18,7 @@ import XMonad
 import XMonad.Hooks.SetWMName
 import XMonad.Layout.Grid
 import XMonad.Actions.SpawnOn
+import XMonad.Actions.CopyWindow
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.ThreeColumns
 import XMonad.Actions.FloatKeys
@@ -287,6 +288,10 @@ myKeyBindings = [((myModMask, xK_b), sendMessage ToggleStruts)
                 , ((myModMask, xK_s), namedScratchpadAction scratchpads "spotify")
                 , ((myModMask .|. mod1Mask, xK_space), spawn "synapse")
                 , ((myModMask, xK_u), focusUrgent)
+
+                , ((modM, xK_c), wsContainingCopies >>= \ws -> case ws of
+                                                                 [] -> windows copyToAll
+                                                                 _ -> killAllOtherCopies)
 
                 , ((modM, xK_h), withFocused (resizeHorizontal ( 1)))
                 , ((modS, xK_h), withFocused (moveHorizontal   (-1)))
