@@ -1,0 +1,6 @@
+* How to Make better
+** Various Broken things
+   + [ ] If I do =Mod-q= to restart things, it reruns my keyboard script and one
+     \tab becomes many...
+** Shortcuts
+   + [ ] =Mod-Backspace= for closing an application.
