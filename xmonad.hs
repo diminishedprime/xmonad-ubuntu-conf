@@ -362,9 +362,9 @@ main = do
       { ppOutput = hPutStrLn xmproc
       , ppTitle = xmobarColor myTitleColor "" . shorten myTitleLength
       , ppCurrent = xmobarColor myCurrentWSColor ""
-                    . wrap myCurrentWSLeft myCurrentWSRight
-      , ppVisible = xmobarColor myVisibleWSColor ""
-                    . wrap myVisibleWSLeft myVisibleWSRight
+      , ppLayout = \_ -> ""
+      , ppHidden = \_ -> ""
+      , ppVisible = \_ -> ""
       , ppUrgent = xmobarColor myUrgentWSColor ""
                    . wrap myUrgentWSLeft myUrgentWSRight
     }
