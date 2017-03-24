@@ -17,8 +17,10 @@
 import XMonad
 import XMonad.Hooks.SetWMName
 import XMonad.Layout.Grid
+import XMonad.Actions.SpawnOn
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.ThreeColumns
+import XMonad.Actions.FloatKeys
 import XMonad.Layout.NoBorders
 import XMonad.Layout.PerWorkspace (onWorkspace)
 import XMonad.Layout.Fullscreen
@@ -137,28 +139,28 @@ perfWorkspace = "-:Perf"
 projects :: [Project]
 projects = [ Project { projectName      = devWorkspace
                      , projectDirectory = "~/programming"
-                     , projectStartHook = Just $ do spawn "emacs"}
+                     , projectStartHook = Just $ do spawnOn devWorkspace "emacs"}
            , Project { projectName      = webWorkspace
                      , projectDirectory = "~/"
-                     , projectStartHook = Just $ do spawn "chromium-browser"}
+                     , projectStartHook = Just $ do spawnOn webWorkspace "chromium-browser"}
            , Project { projectName      = devWebWorkspace
                      , projectDirectory = "~/"
-                     , projectStartHook = Just $ do spawn "chromium-browser"}
+                     , projectStartHook = Just $ do spawnOn devWebWorkspace "chromium-browser"}
            , Project { projectName      = termWorkspace
                      , projectDirectory = "~/"
-                     , projectStartHook = Just $ do spawn myTerminal}
+                     , projectStartHook = Just $ do spawnOn termWorkspace myTerminal}
            , Project { projectName      = chatWorkspace
                      , projectDirectory = "~/"
-                     , projectStartHook = Just $ do spawn $ "chromium-browser  --new-window"
+                     , projectStartHook = Just $ do spawnOn chatWorkspace $ "chromium-browser  --new-window"
                                                       ++ " https://www.messenger.com/ "
                                                       ++ " https://blono-fp-slackers.slack.com/messages/ "
                                                       ++ " https://hangouts.google.com/ "}
            , Project { projectName     = mailWorkSpace
                      , projectDirectory = "~/"
-                     , projectStartHook = Just $ do spawn $ "chromium-browser --new-window --app=\"https://inbox.google.com/\""}
+                     , projectStartHook = Just $ do spawnOn mailWorkSpace $ "chromium-browser --new-window --app=\"https://inbox.google.com/\""}
            , Project { projectName     = perfWorkspace
                      , projectDirectory = "~/"
-                     , projectStartHook = Just $ do spawn $ "gnome-system-monitor"}]
+                     , projectStartHook = Just $ do spawnOn perfWorkspace $ "gnome-system-monitor"}]
 
 myWorkspaces :: [String]
 myWorkspaces = [ mailWorkSpace  , "8:Dbg"        , gimpWorkspace
@@ -260,9 +262,22 @@ myLayouts =
 plexCommand = "google-chrome --app=\"http://plex.mjh.io/web/index.html\" --new-window"
 spotifyCommand = "spotify"
 scratchpads = [ (NS "plex" plexCommand (className =? "Google-chrome")
-                 (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3)))
+                 -- (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3))
+                 defaultFloating
+                )
               , (NS "spotify" spotifyCommand (className =? "Spotify")
                  (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3)))]
+
+
+moveVertical     x = keysMoveWindow   ( 0      , 10 * x )
+resizeVertical   x = keysResizeWindow ( 0      , 10 * x ) (1,1)
+moveHorizontal   x = keysMoveWindow   ( 10 * x , 0      )
+resizeHorizontal x = keysResizeWindow ( 10 * x , 0      ) (1,1)
+resizeCorner     x = keysResizeWindow ( 10 * x , 10 * x ) (1,1)
+
+modC = myModMask  .|. controlMask
+modM = myModMask  .|. mod1Mask
+modS = myModMask .|. shiftMask
 
 myKeyBindings :: [((KeyMask, KeySym), X ())]
 myKeyBindings = [((myModMask, xK_b), sendMessage ToggleStruts)
@@ -271,7 +286,20 @@ myKeyBindings = [((myModMask, xK_b), sendMessage ToggleStruts)
                 , ((myModMask, xK_p), namedScratchpadAction scratchpads "plex")
                 , ((myModMask, xK_s), namedScratchpadAction scratchpads "spotify")
                 , ((myModMask .|. mod1Mask, xK_space), spawn "synapse")
-                , ((myModMask, xK_u), focusUrgent)]
+                , ((myModMask, xK_u), focusUrgent)
+
+                , ((modM, xK_h), withFocused (resizeHorizontal ( 1)))
+                , ((modS, xK_h), withFocused (moveHorizontal   (-1)))
+                , ((modM, xK_l), withFocused (resizeHorizontal (-1)))
+                , ((modS, xK_l), withFocused (moveHorizontal   ( 1)))
+
+                , ((modM, xK_k), withFocused (resizeVertical   ( 1)))
+                , ((modS, xK_k), withFocused (moveVertical     ( 1)))
+                , ((modM, xK_j), withFocused (resizeVertical   (-1)))
+                , ((modS, xK_j), withFocused (moveVertical     (-1)))
+
+                , ((modM, xK_n), withFocused (resizeCorner     (-1)))
+                , ((modM, xK_p), withFocused (resizeCorner     ( 1)))]
 
 
 {-
