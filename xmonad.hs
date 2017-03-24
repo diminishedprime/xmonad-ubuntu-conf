@@ -258,16 +258,18 @@ myLayouts =
   the output.
 -}
 plexCommand = "google-chrome --app=\"http://plex.mjh.io/web/index.html\" --new-window"
-scratchpads = [(NS "plex" plexCommand (className =? "Google-chrome")
-                 (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3))
-                 -- defaultFloating
-                )]
+spotifyCommand = "spotify"
+scratchpads = [ (NS "plex" plexCommand (className =? "Google-chrome")
+                 (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3)))
+              , (NS "spotify" spotifyCommand (className =? "Spotify")
+                 (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3)))]
 
 myKeyBindings :: [((KeyMask, KeySym), X ())]
 myKeyBindings = [((myModMask, xK_b), sendMessage ToggleStruts)
                 , ((myModMask, xK_a), sendMessage MirrorShrink)
                 , ((myModMask, xK_z), sendMessage MirrorExpand)
                 , ((myModMask, xK_p), namedScratchpadAction scratchpads "plex")
+                , ((myModMask, xK_s), namedScratchpadAction scratchpads "spotify")
                 , ((myModMask .|. mod1Mask, xK_space), spawn "synapse")
                 , ((myModMask, xK_u), focusUrgent)]
 
