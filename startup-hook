@@ -70,4 +70,4 @@ fi
 # TOUCHPAD_ID=`xinput | grep 'Synaptics TouchPad' | cut -f 2 | cut -f 2 -d =`
 # xinput set-prop $TOUCHPAD_ID "Device Enabled" 0
 
-# ~/programming/dotfiles/set_up_hyper_modifiers.sh
+xbacklight -set 30

@@ -101,5 +101,9 @@ gnome-keyring-daemon --start --components=gpg,pkcs11,secrets,ssh
 # xmonad related, but it's handy if you're a vim user.
 setxkbmap -option 'ctrl:nocaps'
 
+xset r rate 200 40
+
+~/programming/dotfiles/set_up_hyper_modifiers_2.sh
+
 # Now, finally, start xmonad
 exec xmonad
