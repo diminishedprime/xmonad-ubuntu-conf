@@ -56,6 +56,8 @@ Config {
     -- in Debian and derivatives like Ubuntu.
     Run Com "/bin/bash" ["-c", "~/.xmonad/get-volume"] "myvolume" 10,
 
+    Run Com "/bin/bash" ["-c", "~/.xmonad/get-backlight"] "mybacklight" 10,
+
     -- This line tells xmobar to read input from stdin. That's how we
     -- get the information that xmonad is sending it for display.
     Run StdinReader
@@ -70,5 +72,5 @@ Config {
 
    -- Overall template for the layout of the xmobar contents. Note that
    -- space is significant and can be used to add padding.
-   template = "%StdinReader% }{ %battery% %cpu% %memory% V:%myvolume% <fc=#e6744c>%date%</fc>     "
+   template = "%StdinReader% }{ %mybacklight% %battery% %cpu% %memory% V:%myvolume% <fc=#e6744c>%date%</fc>     "
 }
