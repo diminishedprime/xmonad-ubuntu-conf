@@ -260,12 +260,17 @@ myLayouts =
   Launch the command, then type the key in question and watch
   the output.
 -}
+floatingVideoRR :: W.RationalRect
+floatingVideoRR = W.RationalRect ((100-36)/100) (0/1) (36/100) (25/100)
+
+plexCommand :: String
 plexCommand = "google-chrome --app=\"http://plex.mjh.io/web/index.html\" --new-window"
+spotifyCommand :: String
 spotifyCommand = "spotify"
+
+scratchpads :: [NamedScratchpad]
 scratchpads = [ (NS "plex" plexCommand (className =? "Google-chrome")
-                 -- (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3))
-                 defaultFloating
-                )
+                 (customFloating floatingVideoRR))
               , (NS "spotify" spotifyCommand (className =? "Spotify")
                  (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3)))]
 
