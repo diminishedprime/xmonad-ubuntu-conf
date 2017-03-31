@@ -1,3 +1,5 @@
+* What have I done?
+  + Use =xprop= to figure out what window class etc a window belongs to
 * How to Make better
 ** Various Broken things
    + [ ] If I do =Mod-q= to restart things, it reruns my keyboard script and one

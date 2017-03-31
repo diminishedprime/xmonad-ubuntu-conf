@@ -307,7 +307,7 @@ myKeyBindings = [((myModMask, xK_b), sendMessage ToggleStruts)
                 , ((modM, xK_p), withFocused (resizeCorner     ( 1)))
 
 
-                , ((0, 0x1008FF12), spawn "amixer -q set Master toggle")
+                -- , ((0, 0x1008FF12), spawn "amixer -q set Master toggle")
                 , ((0, 0x1008FF11), spawn "amixer -q set Master 10%-")
                 , ((0, 0x1008FF13), spawn "amixer -q set Master 10%+")
                 , ((0, 0x1008FF03), spawn "xbacklight -10")
